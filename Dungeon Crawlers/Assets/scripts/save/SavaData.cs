@@ -9,10 +9,11 @@ using System.Runtime.Serialization;
 using System.Reflection;
 
 // === This is the info container class ===
-[Serializable()]
+[Serializable]
 public class SaveData : ISerializable
 {
-    public static SaveData saveData = new SaveData();
+    private static SaveData instance;
+    
     // === Values ===
     // Edit these during gameplay
     public int sceneID;
@@ -50,6 +51,17 @@ public class SaveData : ISerializable
         speed = (int)info.GetValue("speed", typeof(int));
     }
 
+    public static SaveData Instance
+    {
+        get
+        {
+            if (instance == null) {
+                instance = new SaveData();
+            }
+            return instance;
+        }
+    }
+
     // Required by the ISerializable class to be properly serialized. This is called automatically
     public void GetObjectData(SerializationInfo info, StreamingContext ctxt)
     {
@@ -59,7 +71,7 @@ public class SaveData : ISerializable
         info.AddValue("actorName", actorName);
         info.AddValue("actorLevel", actorLevel);
         info.AddValue("actorXP", actorXP);
-        info.AddValue("actorClass", (actorClass));
+        info.AddValue("actorClass", actorClass);
         info.AddValue("charisma", charisma);
         info.AddValue("luck", luck);
         info.AddValue("agility", agility);
@@ -70,25 +82,25 @@ public class SaveData : ISerializable
 }
 
 // === This is the class that will be accessed from scripts ===
-public class SaveLoad
+public class SaveLoad : MonoBehaviour
 {
 
-    public static string currentFilePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + "SaveData.dcs";    // Edit this for different save files
-
+    public static string currentFilePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + "\\My Games\\Dungeon Crawlers\\savegame.sav";    // Edit this for different save files
     // Call this to write data
     public static void Save()  // Overloaded
     {
+        System.IO.Directory.CreateDirectory(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + "\\My Games\\Dungeon Crawlers");
         Save(currentFilePath);
     }
     public static void Save(string filePath)
     {
-        SaveData data = new SaveData();
-
-        Stream stream = File.Open(filePath, FileMode.Create);
+        SaveData data = SaveData.Instance;
+        Stream stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite);
         BinaryFormatter bformatter = new BinaryFormatter();
         bformatter.Binder = new VersionDeserializationBinder();
         bformatter.Serialize(stream, data);
         stream.Close();
+        Debug.Log(currentFilePath);
     }
 
     // Call this to load from a file into "data"
@@ -96,11 +108,23 @@ public class SaveLoad
     public static void Load(string filePath)
     {
         SaveData data = new SaveData();
-        Stream stream = File.Open(filePath, FileMode.Open);
+        Stream stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite);
         BinaryFormatter bformatter = new BinaryFormatter();
         bformatter.Binder = new VersionDeserializationBinder();
         data = (SaveData)bformatter.Deserialize(stream);
         stream.Close();
+
+        SaveData.Instance.dungeonsCleared = data.dungeonsCleared;
+        SaveData.Instance.sceneID = data.sceneID;
+        SaveData.Instance.actorName = data.actorName;
+        SaveData.Instance.actorClass = data.actorClass;
+        SaveData.Instance.actorLevel = data.actorLevel;
+        SaveData.Instance.actorXP = data.actorXP;
+        SaveData.Instance.charisma = data.charisma;
+        SaveData.Instance.luck = data.luck;
+        SaveData.Instance.agility = data.agility;
+        SaveData.Instance.strength = data.strength;
+        SaveData.Instance.speed = data.speed;
 
         // Now use "data" to access your Values
     }

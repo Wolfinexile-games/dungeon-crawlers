@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.SceneManagement;
 
 public class CreateNewActor : MonoBehaviour {
 
@@ -34,7 +32,7 @@ public class CreateNewActor : MonoBehaviour {
 
     void OnGUI()
     {
-        actorName = GUILayout.TextArea(actorName);
+        actorName = GUILayout.TextArea(actorName, 16);
 
         /*
         isLycanClass = GUILayout.Toggle(isLycanClass, "Lycan");
@@ -63,6 +61,8 @@ public class CreateNewActor : MonoBehaviour {
             {
                 NewActor.ActorClass = new BaseHighwaymanClass();
             }
+            newActor.DungeonsCleared = 0;
+            newActor.ActorName = actorName;
             newActor.ActorLevel = 1;
             newActor.ActorXP = 0;
             newActor.Charisma = newActor.ActorClass.Charisma;
@@ -71,31 +71,43 @@ public class CreateNewActor : MonoBehaviour {
             newActor.Strength = newActor.ActorClass.Strength;
             newActor.Speed = newActor.ActorClass.Speed;
             //PlayerState.Instance.localPlayerData.SceneID = Application.loadedLevel;
-            PlayerState.Instance.localPlayerData.ActorName = newActor.ActorName;
-            PlayerState.Instance.localPlayerData.ActorClass = newActor.ActorClass;
-            PlayerState.Instance.localPlayerData.ActorLevel = newActor.ActorLevel;
-            PlayerState.Instance.localPlayerData.ActorXP = newActor.ActorXP;
-            PlayerState.Instance.localPlayerData.Charisma = newActor.Charisma;
-            PlayerState.Instance.localPlayerData.Luck = newActor.Luck;
-            PlayerState.Instance.localPlayerData.Agility = newActor.Agility;
-            PlayerState.Instance.localPlayerData.Strength = newActor.Strength;
-            PlayerState.Instance.localPlayerData.Speed = newActor.Speed;
+            SaveData.Instance.dungeonsCleared = newActor.DungeonsCleared;
+            SaveData.Instance.actorName = newActor.ActorName;
+            SaveData.Instance.actorClass = newActor.ActorClass;
+            SaveData.Instance.actorLevel = newActor.ActorLevel;
+            SaveData.Instance.actorXP = newActor.ActorXP;
+            SaveData.Instance.charisma = newActor.Charisma;
+            SaveData.Instance.luck = newActor.Luck;
+            SaveData.Instance.agility = newActor.Agility;
+            SaveData.Instance.strength = newActor.Strength;
+            SaveData.Instance.speed = newActor.Speed;
 
-            GlobalControl.Instance.SaveData();
-
+            SaveLoad.Save();
+            
             Debug.Log(newActor.ActorName);
             Debug.Log(newActor.ActorClass);
 
 
         }
 
-        if (GUILayout.Button("Load Game"))
+        if (GUILayout.Button("Load"))
         {
-            GlobalControl.Instance.LoadData();
-            GlobalControl.Instance.IsSceneBeingLoaded = true;
+            SaveLoad.Load();
+
+            newActor.DungeonsCleared = SaveData.Instance.dungeonsCleared;
+            newActor.ActorName = SaveData.Instance.actorName;
+            newActor.ActorLevel = SaveData.Instance.actorLevel;
+            newActor.ActorClass = SaveData.Instance.actorClass;
+            newActor.ActorXP = SaveData.Instance.actorXP;
+            newActor.Charisma = SaveData.Instance.charisma;
+            newActor.Luck = SaveData.Instance.luck;
+            newActor.Agility = SaveData.Instance.agility;
+            newActor.Strength = SaveData.Instance.strength;
+            newActor.Speed = SaveData.Instance.speed;
 
             Debug.Log(newActor.ActorName);
             Debug.Log(newActor.ActorClass);
+            
 
             //int whichScene = GlobalControl.Instance.LocalCopyOfData.SceneID;
 
